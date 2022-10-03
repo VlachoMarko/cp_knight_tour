@@ -5,11 +5,11 @@
 class Board {
 public:
     Board(int size);
+    int size;
     std::vector<char> letters;
     std::vector<int> numbers;
-    chessMatrix<std::string> coordinates;
-    chessMatrix<bool> visitedSquares;
-    std::string knight_tour;
+    Matrix<std::string> coordinates;
+    Matrix<bool> visitedSquares;
 
 };
 

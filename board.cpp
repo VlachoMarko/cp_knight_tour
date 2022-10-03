@@ -9,7 +9,8 @@ Board::Board(int size){
         this->letters.push_back(baseAscii+i);
         this->numbers.push_back(i+1);
     }
-
+    
+    this->size = size;
     this->coordinates.init(size,size);
     this->visitedSquares.init(size,size);
 };

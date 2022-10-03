@@ -3,22 +3,26 @@
 #include<sstream>
 #include<string>
 #include<cstdlib>
+#include<cassert>
 #include"board.h"
 #include"matrix.h"
 
 
-void printVectors(std::vector<char> letters, std::vector<int> numbers);
+void checkParams(Matrix<std::string> coordinates, std::string start, std::string end);
 
-void checkParams(chessMatrix<std::string> coordinates, std::string start, std::string end);
+bool findKnightsTour(Board gameBoard, std::vector<int> start, std::string end,  std::vector<std::string>& knight_tour);
 
-bool findKnightsTour(Board gameBoard, std::string start, std::string end);
-
-std::string getKnightMoves(Board gameBoard, std::string start);
+std::vector<int> getKnightMoves(Board gameBoard, std::vector<int> start);
 
 int getIndex(std::vector<char> letters, char start_x);
 
-std::vector<int> pushMoves(int x, int y, std::vector<int>& moves, int operations);
+std::vector<int> pushToMoves(int x, int y, std::vector<int>& moves, int operations);
 
+std::vector<int> getIntCoordinates(Board gameBoard, std::string start);
+
+std::string getStringCoordinates(Board gameBoard, int x, int y);
+
+void printVector(std::vector<int> vector);
 
 
 int main(int argc, char *argv[]){
@@ -47,8 +51,20 @@ int main(int argc, char *argv[]){
         gameBoard.visitedSquares.allFalse();
         
         checkParams(gameBoard.coordinates, start, end);
-        bool isTour = findKnightsTour(gameBoard, start, end);
-        std::cout << "Tour is: " << isTour << "\n";
+        std::vector<std::string> knight_tour = {start};
+        std::cout << "start of knight tour: " << knight_tour.at(0) << "\n";
+
+        std::vector<int> startInts = getIntCoordinates(gameBoard, start);
+        gameBoard.visitedSquares.loadTo(startInts.at(0), startInts.at(1), true);
+
+
+        bool isTour = findKnightsTour(gameBoard, startInts, end, knight_tour);
+        
+        std::cout << "isTour is: " << isTour << " actual tour: ";
+
+        for (int i=0; i<knight_tour.size(); i++){
+            std::cout << knight_tour.at(i) << " ";
+        }
 
     
     }
@@ -61,17 +77,7 @@ int main(int argc, char *argv[]){
     return 0;
 }
 
-
-
-void printVectors(std::vector<char> letters, std::vector<int> numbers){
-
-    for (int i=0; i<letters.size(); i++){
-        std::cout << letters.at(i) << numbers.at(i) << "\n";
-    }
-    
-}
-
-void checkParams(chessMatrix<std::string> coordinates, std::string start, std::string end){
+void checkParams(Matrix<std::string> coordinates, std::string start, std::string end){
 
     if (!coordinates.isExists(start) || !coordinates.isExists(end)){
 
@@ -80,69 +86,103 @@ void checkParams(chessMatrix<std::string> coordinates, std::string start, std::s
 
 }
 
-bool findKnightsTour(Board gameBoard, std::string start, std::string end){
+bool findKnightsTour(Board gameBoard, std::vector<int> start, std::string end, std::vector<std::string>& knight_tour){
 
-    if (start == end) return true;
+    std::string startStr = getStringCoordinates(gameBoard, start.at(0), start.at(1));
     
-    std::string knightMoves = getKnightMoves(gameBoard, start);
+    if (startStr == end || gameBoard.visitedSquares.isAllTrue()) return true;
+    
+    std::vector<int> knightMoves = getKnightMoves(gameBoard, start);
 
-    //TODO: Get coordinates as int x and int y, cause isExists will be always true cause of getKnightMoves.
-    // Convert to string after it has been checked in visitedSquares. So it can be passed to knight_tour;
+     for (int i=0; i<knightMoves.size(); i++){
+        int x = knightMoves.at(i);
+        int y = knightMoves.at(i+1);
 
 
-    for(int i=0; i<knightMoves.size(); i = i+2){
-        std::string tempStr;
-        tempStr += knightMoves.at(i);
-        tempStr += knightMoves.at(i+1);
-        
-        // if (gameBoard.coordinates.isExists(tempStr) && !gameBoard.visitedSquares.at(tempStr)){
-        //     gameBoard.visitedSquares.at(tempStr) = true;
-        // }
+        if ((0 <= x && x < gameBoard.size) && (0 <= y && y < gameBoard.size)) { 
+
+            if (gameBoard.visitedSquares.at(x,y)){
+                std::cout << "x and y: " << x << y;
+                i++;
+                continue;
+            }
+            assert(!gameBoard.visitedSquares.at(x,y));
+
+            std::string coordinates = getStringCoordinates(gameBoard, x, y);
+            knight_tour.push_back(coordinates);
+
+            std::cout << "moves to: " << "x: " <<  x << " y: " << y << "\n";
+            gameBoard.visitedSquares.loadTo(x, y, true);
+            std::vector<int> newStart = {x, y};
+
+            bool success = findKnightsTour(gameBoard, newStart, end, knight_tour);
+            if (success) {
+                return true;
+            }
+            else { 
+                std::cout << "moves back to: " << coordinates << " ";
+                std::cout  << "x: " << x << " y: " << y << "\n";
+                gameBoard.visitedSquares.loadTo(x,y,false);
+                knight_tour.pop_back();
+            }
+        }
+
+        i++;
     }
-
 
     return false;
 }
 
 
-std::string getKnightMoves(Board gameBoard, std::string start){
+std::vector<int> getKnightMoves(Board gameBoard, std::vector<int> moves){
+
+    int y = moves.back();
+    moves.pop_back();
+    int x = moves.back();
+    moves.pop_back();
+    
+    std::cout << "Error X: " << x << " Error Y: " << y << "\n";
+
+    for (int i=0; i<4; i++){
+        pushToMoves(x, y, moves, i);
+    }
+
+    printVector(moves);
+    return moves;    
+}
+
+std::vector<int> getIntCoordinates(Board gameBoard, std::string start){
+    std::vector<int> ints; 
 
     char start_x = start.at(0);
+    std::cout << "error start_x: " << start_x << "\n";
+
     int x = getIndex(gameBoard.letters, start_x);
-    int y = stoi(start.substr(1,1)) - 1;
+    assert(x >= 0);
+    int y = stoi(start.substr(1,start.size()-1))-1;
+    assert (y >= 0);
 
-    std::cout << "x : " << x << " y: " << y << "\n";
-    
-    if (x == -1){
-        throw std::runtime_error ("Out of range square");
-    }
+    ints.push_back(x);
+    ints.push_back(y);
 
-    std::vector<int> intMoves;
-    
-    for (int i=0; i<4; i++){
-        pushMoves(x, y, intMoves, i);
-    }
-    
-    std::string strMoves;
+    // std::cout << "not gud x: " << ints.at(0) << " not gud y: " << ints.at(1) <<"\n";
 
-    for (int i=0; i<intMoves.size(); i = i+2){
-        int x = intMoves.at(i);
-        int y = intMoves.at(i+1);
-        if ((0 <= x && x <= 25) && (0 <= y && y <= 25)) { 
-            strMoves += gameBoard.letters.at(x);
-            strMoves += std::to_string(y);
-        }
-        
-    }
-
-    // for (int i=0; i<strMoves.size(); i++){
-    //     std::cout << strMoves.at(i) << "\n";
-    // }
-
-
-    return strMoves;
-    
+    return ints;
 }
+
+std::string getStringCoordinates(Board gameBoard, int x, int y){
+
+    std::string coordinates = "";
+
+    assert(x < 26 && y < 26);
+
+    coordinates += gameBoard.letters.at(x);
+    coordinates += std::to_string(y);
+
+    return coordinates;
+}
+
+    
 
 int getIndex(std::vector<char> letters, char start_x){
 
@@ -151,10 +191,10 @@ int getIndex(std::vector<char> letters, char start_x){
             return i;
         }
     }
-    return -1;
+    return -5;
 }
 
-std::vector<int> pushMoves(int x, int y, std::vector<int>& moves, int operations){
+std::vector<int> pushToMoves(int x, int y, std::vector<int>& moves, int operations){
 
     switch (operations){
         case 0: 
@@ -187,4 +227,14 @@ std::vector<int> pushMoves(int x, int y, std::vector<int>& moves, int operations
     }
 
     return moves;
+}
+
+
+void printVector(std::vector<int> vector){
+
+    for (int i=0; i<vector.size(); i++){
+
+        std::cout << vector.at(i) << "\n";
+
+    }
 }
