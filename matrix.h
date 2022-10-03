@@ -54,6 +54,13 @@ template <typename T> class chessMatrix{
             
         };
 
+        //TODO
+        T at(std::string coordinate){
+            char row = coordinate(0)
+            int column = coordinate(1)
+
+        }
+
         void loadTo(int row, int column, T inputData){
             if (this->row_size*row+column > data.size()){
                 throw std::runtime_error("Out of range");

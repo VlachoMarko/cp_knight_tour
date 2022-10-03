@@ -9,7 +9,7 @@ public:
     std::vector<int> numbers;
     chessMatrix<std::string> coordinates;
     chessMatrix<bool> visitedSquares;
-    std::vector<std::string> knight_tour;
+    std::string knight_tour;
 
 };
 
