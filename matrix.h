@@ -1,11 +1,10 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-template <typename T> class chessMatrix{
+template <typename T> class Matrix{
 
     public:
-
-        chessMatrix(){};
+        Matrix(){};
         
         void init(int row_size, int column_size){
 
@@ -54,11 +53,15 @@ template <typename T> class chessMatrix{
             
         };
 
-        //TODO
-        T at(std::string coordinate){
-            char row = coordinate(0)
-            int column = coordinate(1)
 
+        T at(int row, int column){
+            if (this->row_size*row+column > data.size()){
+                std::string error_row = std::to_string(row);
+                std::string error_column = std::to_string(column);
+                throw std::runtime_error("Out of range" + error_row + error_column);
+            }
+           
+            return data.at(this->row_size*row+column);
         }
 
         void loadTo(int row, int column, T inputData){
@@ -68,8 +71,19 @@ template <typename T> class chessMatrix{
             data.at(this->row_size*row+column) = inputData;
         };
 
-       
+        
+        bool isAllTrue(){
+            bool allTrue = true;
+            for(int i=0; i<data.size(); i++){
+                if (data.at(i) == false){
+                    return false;
+                }
+            }
 
+            return allTrue;
+        }
+
+    
 
     private:
         std::vector<T> data;
