@@ -6,8 +6,12 @@ class Board {
 public:
     Board(int size);
     int size;
+    std::string startStr, endStr;
+    
+    std::vector<std::string> knight_tour;
     std::vector<char> letters;
     std::vector<int> numbers;
+
     Matrix<std::string> coordinates;
     Matrix<bool> visitedSquares;
 

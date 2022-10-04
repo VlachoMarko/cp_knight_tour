@@ -11,8 +11,8 @@ Board::Board(int size){
     }
     
     this->size = size;
-    this->coordinates.init(size,size);
-    this->visitedSquares.init(size,size);
+    this->coordinates.init(size);
+    this->visitedSquares.init(size);
 };
 
 

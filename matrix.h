@@ -6,18 +6,17 @@ template <typename T> class Matrix{
     public:
         Matrix(){};
         
-        void init(int row_size, int column_size){
-
-            if (row_size > 26 || column_size > 26) {
+        void init(int size){
+            if (size > 26) {
                 throw std::runtime_error ("invalid parameter list");
             }
-            this->data.resize(row_size*column_size);
-            this->row_size = row_size;
-            this->column_size = column_size;
+            this->data.resize(size*size);
+            this->row_size = size;
+            this->column_size = size;
         };
 
 
-        void initChessSquares(std::vector<char> letters, std::vector<int> numbers){
+        void initCoordinates(std::vector<char> letters, std::vector<int> numbers){
             std::string tempStr;
 
             for (int i=0; i<letters.size(); i++){
@@ -30,35 +29,25 @@ template <typename T> class Matrix{
 
         };
 
-        void printSquares(){
-            for (int i=0; i<data.size(); i++){
-                std::cout << this->data.at(i) << std::endl;
-            }
-        };
-
-        bool isExists(std::string compareString){
+        bool notContains(std::string compareString){
             for (int i=0; i<this->data.size(); i++){
                 if (this->data.at(i) == compareString){
-                    return true;
+                    return false;
                 }
             }
 
-            return false;
+            return true;
         };
 
-        void allFalse(){
+        void setAllFalse(){
             for (int i=0; i<this->data.size(); i++){
                 this->data.at(i) = false;
             }
-            
         };
-
 
         T at(int row, int column){
             if (this->row_size*row+column > data.size()){
-                std::string error_row = std::to_string(row);
-                std::string error_column = std::to_string(column);
-                throw std::runtime_error("Out of range" + error_row + error_column);
+                throw std::runtime_error("Out of range");
             }
            
             return data.at(this->row_size*row+column);
@@ -71,25 +60,10 @@ template <typename T> class Matrix{
             data.at(this->row_size*row+column) = inputData;
         };
 
-        
-        bool isAllTrue(){
-            bool allTrue = true;
-            for(int i=0; i<data.size(); i++){
-                if (data.at(i) == false){
-                    return false;
-                }
-            }
-
-            return allTrue;
-        }
-
-    
-
     private:
         std::vector<T> data;
         int row_size;
         int column_size;
-
 };
 
 #endif
